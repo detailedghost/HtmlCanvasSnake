@@ -1,0 +1,156 @@
+<canvas id='snake-con' width='500px' height='500px' style='background-color: black; display: block; margin: 0 auto'></canvas>
+  <script type='text/javascript'>
+var tail = [];
+    window.onload = function(){
+      let con = document.getElementById('snake-con');
+      let head = con.getContext('2d');
+      let hvx = 250, hvy = 250, avx = 0, avy = 0;
+      let direction = '';
+      let on = true;
+      //let tail = [];
+      const RECT_SIZE = 15;
+
+      head.fillStyle = '#FF0000';
+      head.fillRect(hvx, hvy, RECT_SIZE, RECT_SIZE);
+
+      function square(x, y, fill) {
+        this.x = x || 0;
+        this.y = y || 0;
+        this.px = this.x;
+        this.py = this.py;
+        this.fill = fill ||  '#0000FF';
+        this.paint = function(x, y){
+          head.clearRect(this.x, this.y, RECT_SIZE, RECT_SIZE);
+          this.px = this.x;
+          this.py = this.y;
+          this.x = x || this.x;
+          this.y = y || this.y;
+          head.fillStyle = this.fill;
+          head.fillRect(this.x, this.y, RECT_SIZE, RECT_SIZE);
+          this.fill = fill ||  '#0000FF';
+        };
+      }
+
+
+      function move(d){
+        if(d)
+          direction = d;
+
+        head.clearRect(hvx, hvy, RECT_SIZE, RECT_SIZE);
+
+        if(direction == 'r')
+            hvx += RECT_SIZE;
+        if(direction == 'u')
+            hvy += RECT_SIZE;
+        if(direction == 'l')
+            hvx -= RECT_SIZE;
+        if(direction == 'd')
+            hvy -= RECT_SIZE;
+
+        if(tail.length > 0){
+
+          for(let i=0, ii = tail.length; i < ii; i++){
+          let prev = tail[i-1] || null;
+          let nx = prev ? prev.px : hvx, ny = prev ? prev.py : hvy;
+
+
+          if(direction == 'r'){
+            nx = prev ? prev.px: hvx - RECT_SIZE;
+          } else if (direction == 'l') {
+            nx = prev ? prev.px: hvx + RECT_SIZE;
+          } else if(direction == 'u'){
+            ny = prev ? prev.py: hvy - RECT_SIZE;
+          } else if (direction == 'd') {
+            ny = prev ? prev.py: hvy + RECT_SIZE;
+          }
+
+          tail[i].paint(nx, ny);
+            if( 
+              (((hvx > tail[i].x && hvx < tail[i].x + RECT_SIZE) && (hvy > tail[i].y && hvy < tail[i].y + RECT_SIZE)) ||
+              ((hvx + RECT_SIZE > tail[i].x && hvx < tail[i].x + RECT_SIZE) && (hvy + RECT_SIZE > tail[i].y && hvy < tail[i].y + RECT_SIZE))
+            )){
+            clearInterval(go);
+            }
+        }
+        }
+
+        head.fillStyle = '#FF0000';
+        if(hvx + RECT_SIZE > con.width)
+          hvx = 0;
+        if(hvx < 0)
+          hvx = con.width - RECT_SIZE;
+        if(hvy + RECT_SIZE > con.height)
+          hvy = 0;
+        if(hvy < 0)
+          hvy = con.height - RECT_SIZE;
+
+        if(
+          (
+          (hvx > avx && hvx < avx + RECT_SIZE) && 
+          (hvy > avy && hvy < avy + RECT_SIZE)
+            ) ||
+          (
+            (hvx + RECT_SIZE > avx && hvx < avx + RECT_SIZE) && 
+          (hvy + RECT_SIZE > avy && hvy < avy + RECT_SIZE)
+            )
+        ){
+          createApple(true, true);
+        }
+        createApple(false,false);
+
+        head.fillRect(hvx, hvy, RECT_SIZE, RECT_SIZE);
+      }
+
+      function addTail(x, y){
+        if(tail.length < 10)
+            tail.push(new square(x, y)); 
+      }
+
+      function createApple(f, n){
+        head.clearRect(avx, avy, RECT_SIZE, RECT_SIZE);
+        if(f)
+            addTail(avx, avy);
+        if(n){
+        avx = Math.floor(Math.random() * (con.width - RECT_SIZE));
+        avy = Math.floor(Math.random() * (con.height - RECT_SIZE));
+        }
+        head.fillStyle = '#00FF00';
+        head.fillRect(avx,avy,RECT_SIZE, RECT_SIZE);
+        head.fillStyle = '#FF0000';
+      }
+
+      function changeDirection(d){
+        direction = d;
+      }
+
+      let go; 
+      function gamego() {
+          go = setInterval(function(){
+          move();
+        }, 100);
+      }
+
+
+      window.addEventListener('keydown',function(e){
+        if(e.keyCode == 37)
+          changeDirection('l');
+        if(e.keyCode == 38)
+          changeDirection('d');
+        if(e.keyCode == 39)
+          changeDirection('r');
+        if(e.keyCode == 40)
+          changeDirection('u');
+        if(e.keyCode == 32){
+            if(on){
+                gamego();
+              direction = 'r';
+              createApple(false, true);
+            } else{ 
+                clearInterval(go);
+            }
+            on = !on;
+        }
+      }, false);
+
+    };
+  </script>
